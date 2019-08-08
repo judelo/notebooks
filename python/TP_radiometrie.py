@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans  # for kmeans
 
 
-def todo_equalization():
 
-    imrgb1 = plt.imread('../im/parrot_bright.png')
-    imrgb2 = plt.imread('../im/parrot_dark.png')
+def todo_equalization(imrgb1,imrgb2):
 
     imgray1 = imrgb1[:,:,0]
     imgray2 = imrgb2[:,:,0]
@@ -36,9 +34,7 @@ def todo_equalization():
     fig.tight_layout()
     plt.show()
  
-def todo_noise_histograms():
-
-    imgray = np.mean(plt.imread('../im/parrot.png'),2)
+def todo_noise_histograms(imgray):
 
     fig, axes = plt.subplots(nrows=4, ncols=2, figsize=(20, 20))
     for k in range(4):
@@ -49,8 +45,7 @@ def todo_noise_histograms():
         axes[k,1].bar(np.arange(0,256),imhisto)
         
 
-def todo_lloyd_max():
-    imgray  = np.mean(plt.imread('../im/simpson512.png'),2)
+def todo_lloyd_max(imgray):
     K        = 10 # number of classes
     X        = imgray.reshape((imgray.shape[0]*imgray.shape[1],1))
     clusters = KMeans(n_clusters=K).fit_predict(X)
@@ -63,8 +58,7 @@ def todo_lloyd_max():
     plt.imshow(mu[clusters].reshape((imgray.shape[0],imgray.shape[1])),cmap='gray')
 
 
-def todo_dithering():
-    imgray  = np.mean(plt.imread('../im/simpson512.png'),2)
+def todo_dithering(imgray):
     imgray = imgray+5/255*np.random.randn(imgray.shape[0],imgray.shape[1])   
     K        = 10 # number of classes
     X        = imgray.reshape((imgray.shape[0]*imgray.shape[1],1))
