@@ -1,0 +1,8 @@
+name: practical sessions
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - matplotlib
+  - scikit-learn
