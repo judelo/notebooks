@@ -38,21 +38,20 @@ def todo_transport3D(X,Y,N,e): #X,y,Z are nx3 matrices
     return Z,sZ,sY
 
 
+
 def average_filter(u,r):
     # uniform filter with a square (2*r+1)x(2*r+1) window 
     # u is a 2d image
     # r is the radius for the filter
    
     (nrow, ncol)                                      = u.shape
-    uint                                              = np.cumsum(np.cumsum(u,0),1)
     big_uint                                          = np.zeros((nrow+2*r+1,ncol+2*r+1))
-    big_uint[r+1:nrow+r+1,r+1:ncol+r+1]               = uint
-    big_uint[nrow+r+1:nrow+2*r+1,ncol+r+1:ncol+2*r+1] = np.ones((r,r))*uint[nrow-1,ncol-1]
-    big_uint[nrow+r+1:nrow+2*r+1,r+1:ncol+r+1]        = np.tile(uint[nrow-1,:],(r,1))
-    big_uint[r+1:nrow+r+1,ncol+r+1:ncol+2*r+1]        = np.tile(uint[:,ncol-1],(r,1)).T
+    big_uint[r+1:nrow+r+1,r+1:ncol+r+1]               = u
+    big_uint                                          = np.cumsum(np.cumsum(big_uint,0),1)       # integral image
         
     out = big_uint[2*r+1:nrow+2*r+1,2*r+1:ncol+2*r+1] + big_uint[0:nrow,0:ncol] - big_uint[0:nrow,2*r+1:ncol+2*r+1] - big_uint[2*r+1:nrow+2*r+1,0:ncol]
     out = out/(2*r+1)**2
+    
     return out
 
 def todo_guided_filter(u,guide,r,eps):
