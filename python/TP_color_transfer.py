@@ -38,21 +38,37 @@ def todo_transport3D(X,Y,N,e): #X,y,Z are nx3 matrices
     return Z,sZ,sY
 
 
+def average_filter(u,r):
+    # uniform filter with a square (2*r+1)x(2*r+1) window 
+    # u is a 2d image
+    # r is the radius for the filter
+   
+    (nrow, ncol)                                      = u.shape
+    uint                                              = np.cumsum(np.cumsum(u,0),1)
+    big_uint                                          = np.zeros((nrow+2*r+1,ncol+2*r+1))
+    big_uint[r+1:nrow+r+1,r+1:ncol+r+1]               = uint
+    big_uint[nrow+r+1:nrow+2*r+1,ncol+r+1:ncol+2*r+1] = np.ones((r,r))*uint[nrow-1,ncol-1]
+    big_uint[nrow+r+1:nrow+2*r+1,r+1:ncol+r+1]        = np.tile(uint[nrow-1,:],(r,1))
+    big_uint[r+1:nrow+r+1,ncol+r+1:ncol+2*r+1]        = np.tile(uint[:,ncol-1],(r,1)).T
+        
+    out = big_uint[2*r+1:nrow+2*r+1,2*r+1:ncol+2*r+1] + big_uint[0:nrow,0:ncol] - big_uint[0:nrow,2*r+1:ncol+2*r+1] - big_uint[2*r+1:nrow+2*r+1,0:ncol]
+    out = out/(2*r+1)**2
+    return out
+
 def todo_guided_filter(u,guide,r,eps):
-    phi         = np.ones((2*r+1,2*r+1))/(2*r+1)**2
-    C           = scs.convolve2d(np.ones(u.shape), phi, mode='same')   # to avoid image edges pb 
-    mean_u      = scs.convolve2d(u, phi, mode='same')/C
-    mean_guide  = scs.convolve2d(guide, phi, mode='same')/C
-    corr_guide  = scs.convolve2d(guide*guide, phi, mode='same')/C
-    corr_uguide = scs.convolve2d(u*guide, phi, mode='same')/C
+    C           = average_filter(np.ones(u.shape), r)   # to avoid image edges pb 
+    mean_u      = average_filter(u, r)/C
+    mean_guide  = average_filter(guide, r)/C
+    corr_guide  = average_filter(guide*guide, r)/C
+    corr_uguide = average_filter(u*guide, r)/C
     var_guide   = corr_guide - mean_guide * mean_guide
     cov_uguide  = corr_uguide - mean_u * mean_guide
 
     alph = cov_uguide / (var_guide + eps)
     beta = mean_u - alph * mean_guide
 
-    mean_alph = scs.convolve2d(alph, phi, mode='same')/C
-    mean_beta = scs.convolve2d(beta, phi, mode='same')/C
+    mean_alph = average_filter(alph, r)/C
+    mean_beta = average_filter(beta, r)/C
 
     q = mean_alph * guide + mean_beta
     return q
