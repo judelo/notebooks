@@ -21,7 +21,7 @@ def transport1D(X,Y):
     sy = np.argsort(Y)
     return((sx,sy)) 
 
-def todo_transport3D(X,Y,N,e): #X,y,Z are nx3 matrices
+def todo_transport3D(X,Y,N,eps): #X,y,Z are nx3 matrices
     Z=np.copy(X) # output
     for k in range(N):
         u=np.random.randn(3,3)
@@ -32,14 +32,15 @@ def todo_transport3D(X,Y,N,e): #X,y,Z are nx3 matrices
             Zt=np.dot(Z,q[:,i])
             #Permutations
             [sZ,sY]=transport1D(Zt,Yt)
-            for j in range(X.shape[0]):
-                Z[sZ[j],:]=Z[sZ[j],:]+e*(Yt[sY[j]]-Zt[sZ[j]])*(q[:,i]) #transport 3D
+            Z[sZ,:] += eps * (Yt[sY]-Zt[sZ])[:,None] * q[:,i][None,:] # 3D transport
+            # equivalent to
+            #for j in range(X.shape[0]):
+            #    Z[sZ[j],:]=Z[sZ[j],:]+e*(Yt[sY[j]]-Zt[sZ[j]])*(q[:,i]) #transport 3D
         
     return Z,sZ,sY
 
 
-
-def average_filter(u,r):
+def average_filter(u,r):    # implementation with integral images
     # uniform filter with a square (2*r+1)x(2*r+1) window 
     # u is a 2d image
     # r is the radius for the filter
